@@ -1,5 +1,4 @@
 
-
 name: Model Training CICD
 
 on:
@@ -14,31 +13,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # Step 2: Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
+      # Step 3: Install CML
       - name: Install CML
         uses: iterative/setup-cml@v2
 
+      # Step 4: Install Dependencies
       - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
+      # Step 5: Check Dataset
       - name: Check Dataset
         run: |
           ls -la
           head -5 iris.csv
 
+      # Step 6: Train Model
       - name: Train Model
         run: |
           python -u train_model.py
 
+      # Step 7: Check Output Files
       - name: Check Output Files
         run: |
           ls -lh
           cat scores.txt
+
+      # Step 8: Create CML Report
+      - name: Create CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "# Model Training Results" > report.md
+
+          echo "## Random Forest and Logistic Regression Scores" >> report.md
+          cat scores.txt >> report.md
+
+          cml comment create report.md
