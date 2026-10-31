@@ -1,4 +1,5 @@
 
+
 name: Model Training CICD
 
 on:
@@ -21,24 +22,23 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Setup CML
+      - name: Install CML
         uses: iterative/setup-cml@v2
 
-      - name: Train Model
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
-          python train_model.py
+      - name: Check Dataset
+        run: |
+          ls -la
+          head -5 iris.csv
 
-          echo "# RF and LR Model Score" > report.md
-          cat scores.txt >> report.md
+      - name: Train Model
+        run: |
+          python -u train_model.py
 
-          echo "## Confusion Matrix" >> report.md
-          echo "![](./ConfusionMatrix.png)" >> report.md
-
-          echo "## Feature Importance" >> report.md
-          echo "![](./FeatureImportance.png)" >> report.md
-
-          cml comment create report.md
+      - name: Check Output Files
+        run: |
+          ls -lh
+          cat scores.txt
